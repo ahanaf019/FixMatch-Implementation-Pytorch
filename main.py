@@ -1,4 +1,6 @@
 import os
+
+import torch.optim.sgd
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 
 from glob import glob
@@ -44,7 +46,7 @@ def main():
         labels=labels_val, 
         image_size=IMAGE_SIZE,
         weak_augments=val_transforms,
-        strong_augments=strong_transforms
+        strong_augments=val_transforms
     )
 
     unlabeled_db = SSDataset(
@@ -54,22 +56,34 @@ def main():
         weak_augments=weak_transforms,
         strong_augments=strong_transforms
     )
-
+    
     train_loader = DataLoader(train_db, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count())
     val_loader = DataLoader(val_db, batch_size=BATCH_SIZE, shuffle=False, num_workers=os.cpu_count())
     unlabeled_loader = DataLoader(unlabeled_db, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count())
 
-
-    model = CNNModel(num_classes=NUM_CLASSES, dropout_rate=0.25).to(device)
+    model = CNNModel(dropout_rate=0.40, num_classes=10).to(device)
+    # model.apply(init_weights_he)
     summary(model, input_size=[1, 3, 96, 96])
 
-    optim = torch.optim.AdamW(model.parameters(), lr=1e-4)
+    optim = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9, weight_decay=5e-4, nesterov=True)
+    # optim = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=5e-4)
     loss_fn = nn.CrossEntropyLoss()
     
-    trainer = FixMatchTrainer(model, optim, loss_fn, NUM_CLASSES, device)
-    trainer.fit(train_loader, unlabeled_loader, val_loader, NUM_EPOCHS, WARMUP_EPOCHS, THRESHOLD, LAMBDA_U)
+    # lr_scheduler = torch.optim.lr_scheduler.LambdaLR(optim, lr_lambda=custom_lr_schedule)
+    warmup_scheduler = torch.optim.lr_scheduler.LinearLR(optim, start_factor=0.01, end_factor=1.0, total_iters=WARMUP_STEPS)
+    cosine_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optim, T_max=NUM_TRAINING_STEPS - WARMUP_STEPS, eta_min=0)
+    # Combine both schedulers sequentially
+    lr_scheduler = torch.optim.lr_scheduler.SequentialLR(optim, schedulers=[warmup_scheduler, cosine_scheduler], milestones=[WARMUP_STEPS])
     
+    trainer = FixMatchTrainer(model, optim, loss_fn, NUM_CLASSES, device)
+    trainer.fit(train_loader, unlabeled_loader, val_loader, NUM_TRAINING_STEPS, THRESHOLD, LAMBDA_U, lr_scheduler)
 
+
+def init_weights_he(m):
+    if isinstance(m, (nn.Conv2d, nn.Linear)):
+        nn.init.kaiming_normal_(m.weight, nonlinearity='relu')
+        if m.bias is not None:
+            nn.init.constant_(m.bias, 0)
 
 if __name__ == '__main__':
     main()

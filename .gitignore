@@ -1,4 +1,5 @@
 checkpoints
+tensorboard
 __pycache__
 *.jpg
 *.jpeg

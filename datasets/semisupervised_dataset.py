@@ -23,5 +23,5 @@ class SSDataset(Dataset):
 
 
         if self.labels is not None:
-            return self.strong_transforms(image), torch.tensor(self.labels[index])
+            return self.weak_transforms(image), torch.tensor(self.labels[index])
         return  self.weak_transforms(image), self.strong_transforms(image)
