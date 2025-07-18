@@ -4,13 +4,13 @@ from utils.utils import read_image
 
 
 class SSDataset(Dataset):
-    def __init__(self, image_paths, labels, image_size, weak_augments=None, strong_augments=None):
+    def __init__(self, image_paths, labels, image_size, transforms_1=None, transforms_2=None):
         super().__init__()
         self.image_paths = image_paths
         self.labels = labels
         self.image_size = image_size
-        self.weak_transforms = weak_augments
-        self.strong_transforms = strong_augments
+        self.transforms_1 = transforms_1
+        self.transforms_2 = transforms_2
     
 
     def __len__(self):
@@ -23,5 +23,5 @@ class SSDataset(Dataset):
 
 
         if self.labels is not None:
-            return self.weak_transforms(image), torch.tensor(self.labels[index])
-        return  self.weak_transforms(image), self.strong_transforms(image)
+            return self.transforms_1(image), torch.tensor(self.labels[index])
+        return  self.transforms_1(image), self.transforms_2(image)

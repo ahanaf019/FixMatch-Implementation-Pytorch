@@ -37,24 +37,24 @@ def main():
         image_paths=images_train,
         labels=labels_train, 
         image_size=IMAGE_SIZE,
-        weak_augments=weak_transforms,
-        strong_augments=strong_transforms
+        transforms_1=weak_transforms,
+        transforms_2=strong_transforms
     )
 
     val_db = SSDataset(
         image_paths=images_val,
         labels=labels_val, 
         image_size=IMAGE_SIZE,
-        weak_augments=val_transforms,
-        strong_augments=val_transforms
+        transforms_1=val_transforms,
+        transforms_2=val_transforms
     )
 
     unlabeled_db = SSDataset(
         image_paths=unlabeled_images,
         labels=None,
         image_size=IMAGE_SIZE, 
-        weak_augments=weak_transforms,
-        strong_augments=strong_transforms
+        transforms_1=weak_transforms,
+        transforms_2=strong_transforms
     )
     
     train_loader = DataLoader(train_db, batch_size=BATCH_SIZE, shuffle=True, num_workers=os.cpu_count())
