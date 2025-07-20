@@ -37,7 +37,7 @@ class FixMatchTrainer():
         labeled_iter = infinite_iterator(labeled_loader)
         unlabeled_iter = infinite_iterator(unlabeled_loader)
 
-        for step in range(num_total_steps):
+        for step in tqdm(range(num_total_steps)):
             labeled_images, labels = next(labeled_iter)
             weak_img, strong_img = next(unlabeled_iter)
 

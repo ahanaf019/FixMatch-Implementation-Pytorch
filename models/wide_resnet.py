@@ -23,9 +23,9 @@ class BasicBlock(nn.Module):
                 stride=self.stride,
                 padding=1
             ),
+            nn.Dropout(self.dropout_rate),
             nn.BatchNorm2d(self.out_filters),
             nn.ReLU(inplace=False),
-            nn.Dropout(self.dropout_rate),
             nn.Conv2d(
                 in_channels=self.out_filters,
                 out_channels=self.out_filters,
@@ -51,7 +51,7 @@ class BasicBlock(nn.Module):
 
 
 class WideResNet(nn.Module):
-    def __init__(self, in_channels, base_filters, k, N, num_classes=10):
+    def __init__(self, in_channels, base_filters, k, N, num_classes=10, dropout_rate=0.0):
         super().__init__()
         self.base_filters = base_filters
         self.conv1 = nn.Sequential(
@@ -70,13 +70,13 @@ class WideResNet(nn.Module):
             BasicBlock(
                 in_filters=self.base_filters,
                 out_filters=self.base_filters * k,
-                stride=1, dropout_rate=0.4,
+                stride=1, dropout_rate=dropout_rate,
             ),
             *[
             BasicBlock(
                 in_filters=self.base_filters * k,
                 out_filters=self.base_filters * k,
-                stride=1, dropout_rate=0.4,
+                stride=1, dropout_rate=dropout_rate,
             ) for _ in range(N - 1)
         ])
 
@@ -85,13 +85,13 @@ class WideResNet(nn.Module):
             BasicBlock(
                 in_filters=self.base_filters * k,
                 out_filters=self.base_filters * 2 * k,
-                stride=2, dropout_rate=0.4,
+                stride=2, dropout_rate=dropout_rate,
             ),
             *[
             BasicBlock(
                 in_filters=self.base_filters * 2 * k,
                 out_filters=self.base_filters * 2 * k,
-                stride=1, dropout_rate=0.4,
+                stride=1, dropout_rate=dropout_rate,
             ) for _ in range(N - 1)
         ])
 
@@ -100,13 +100,13 @@ class WideResNet(nn.Module):
             BasicBlock(
                 in_filters=self.base_filters * 2 * k,
                 out_filters=self.base_filters * 4 * k,
-                stride=2, dropout_rate=0.4,
+                stride=2, dropout_rate=dropout_rate,
             ),
             *[
             BasicBlock(
                 in_filters=self.base_filters * 4 * k,
                 out_filters=self.base_filters * 4 * k,
-                stride=1, dropout_rate=0.4,
+                stride=1, dropout_rate=dropout_rate,
             ) for _ in range(N - 1)
         ])
 

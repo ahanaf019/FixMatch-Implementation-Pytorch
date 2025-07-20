@@ -19,7 +19,7 @@ class SSDataset(Dataset):
 
     def __getitem__(self, index):
         image_path = self.image_paths[index]
-        image = read_image(image_path)
+        image = read_image(image_path, self.image_size)
 
 
         if self.labels is not None:
