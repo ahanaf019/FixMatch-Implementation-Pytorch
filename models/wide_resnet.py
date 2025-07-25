@@ -15,7 +15,7 @@ class BasicBlock(nn.Module):
 
         self.layers = nn.Sequential(
             nn.BatchNorm2d(self.in_filters),
-            nn.ReLU(inplace=False),
+            nn.LeakyReLU(inplace=False),
             nn.Conv2d(
                 in_channels=self.in_filters,
                 out_channels=self.out_filters,
@@ -25,7 +25,7 @@ class BasicBlock(nn.Module):
             ),
             nn.Dropout(self.dropout_rate),
             nn.BatchNorm2d(self.out_filters),
-            nn.ReLU(inplace=False),
+            nn.LeakyReLU(inplace=False),
             nn.Conv2d(
                 in_channels=self.out_filters,
                 out_channels=self.out_filters,
@@ -56,7 +56,7 @@ class WideResNet(nn.Module):
         self.base_filters = base_filters
         self.conv1 = nn.Sequential(
             nn.BatchNorm2d(in_channels),
-            nn.ReLU(),
+            nn.LeakyReLU(),
             nn.Conv2d(
                 in_channels=in_channels,
                 out_channels=self.base_filters,

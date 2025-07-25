@@ -45,14 +45,14 @@ def main():
     print(next(iter(test_loader))[0].shape)
     print(IMAGE_SIZE)
 
-    model = WideResNet(in_channels=3, base_filters=16, k=4, N=6, num_classes=NUM_CLASSES, dropout_rate=0.1).to(device)
+    model = WideResNet(in_channels=3, base_filters=16, k=2, N=4, num_classes=NUM_CLASSES, dropout_rate=0.1).to(device)
     summary(model, input_size=[1, 3, IMAGE_SIZE, IMAGE_SIZE])
 
     optim = torch.optim.SGD(model.parameters(), lr=LEARNING_RATE, momentum=0.9, weight_decay=5e-4, nesterov=True)
     loss_fn = nn.CrossEntropyLoss(label_smoothing=0.1)
     
     lr_scheduler = torch.optim.lr_scheduler.MultiStepLR(optim, milestones=MILESTONES, gamma=GAMMA)
-    model, _ = load_state('./checkpoints/WideResNet_96.pt', model, None)
+    model, _ = load_state('./checkpoints/fixmatch/WideResNet.pt', model, None)
     # trainer = FixMatchTrainer(model, optim, loss_fn, NUM_CLASSES, device)
     trainer = SupervisedTrainer(model, optim, loss_fn, NUM_CLASSES, device)
     print(trainer.validation_epoch(test_loader))
